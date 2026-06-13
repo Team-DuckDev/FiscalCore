@@ -1,5 +1,7 @@
 package com.example.FiscalCore.model;
 
+import com.example.FiscalCore.strategy.EstrategiaImposto;
+
 public class CalculadoraTributaria {
     
 private EstrategiaImposto estrategiaImposto;
