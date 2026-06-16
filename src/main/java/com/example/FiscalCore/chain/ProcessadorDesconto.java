@@ -1,7 +1,6 @@
 package com.example.FiscalCore.chain;
 
 import com.example.FiscalCore.model.Orcamento;
-import org.aspectj.weaver.ast.Or;
 
 public abstract class ProcessadorDesconto {
     protected ProcessadorDesconto proximoProcessador;
@@ -10,5 +9,5 @@ public abstract class ProcessadorDesconto {
         proximoProcessador = proximo;
     }
 
-    public abstract float processar(Orcamento orcamento);
+    public abstract void processar(Orcamento orcamento);
 }
