@@ -1,5 +1,7 @@
 package com.example.FiscalCore.service;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import com.example.FiscalCore.chain.DescontoMuitosItens;
@@ -8,10 +10,6 @@ import com.example.FiscalCore.chain.ProcessadorDesconto;
 import com.example.FiscalCore.chain.SemDesconto;
 import com.example.FiscalCore.model.Orcamento;
 import com.example.FiscalCore.strategy.EstrategiaImposto;
-import com.example.FiscalCore.strategy.ImpostoICMS;
-import com.example.FiscalCore.strategy.ImpostoIPI;
-import com.example.FiscalCore.strategy.ImpostoISS;
-import com.example.FiscalCore.strategy.ImpostoPIS;
 
 import jakarta.annotation.PostConstruct;
 
@@ -19,6 +17,11 @@ import jakarta.annotation.PostConstruct;
 public class CalculadoraTributariaService {
 
     private ProcessadorDesconto cadeiaDesconto;
+    private final Map<String, EstrategiaImposto> mapEstrategias;
+
+    public CalculadoraTributariaService(Map<String, EstrategiaImposto> mapEstrategias) {
+        this.mapEstrategias = mapEstrategias;
+    }
 
     @PostConstruct
     public void init() {
@@ -35,18 +38,14 @@ public class CalculadoraTributariaService {
     public float calcularImpostoFinal(Orcamento o, String tipoImposto) {
         if (o == null) throw new IllegalArgumentException("Orcamento não pode ser nulo");
 
-        EstrategiaImposto estrategiaImposto;
+        EstrategiaImposto estrategia = mapEstrategias.get(tipoImposto.toUpperCase());
         
-        switch (tipoImposto.toUpperCase()) {
-            case "ICMS": estrategiaImposto = new ImpostoICMS(); break;
-            case "IPI":  estrategiaImposto = new ImpostoIPI(); break;
-            case "ISS":  estrategiaImposto = new ImpostoISS(); break;
-            case "PIS":  estrategiaImposto = new ImpostoPIS(); break;
-            default: throw new IllegalArgumentException("Imposto desconhecido: " + tipoImposto);
+        if (estrategia == null) {
+            throw new IllegalArgumentException("Imposto desconhecido ou não suportado: " + tipoImposto);
         }
 
         cadeiaDesconto.processar(o);
 
-        return estrategiaImposto.calcular(o.getValorTotal());
+        return estrategia.calcular(o.getValorTotal());
     }
 }
